@@ -1,0 +1,1 @@
+require_relative './ch01/test'
