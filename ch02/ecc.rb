@@ -38,14 +38,14 @@ class FieldElement
   end
 
   def *(other)
-    operation = lambda {|other| 
+    operation = lambda {|other|
       (self.num * other.num) % self.prime
     }
     op(other, 'multiplication', operation)
   end
 
   def **(other)
-    operation = lambda {|other| 
+    operation = lambda {|other|
       (self.num ** other.num) % self.prime
     }
 
@@ -53,7 +53,7 @@ class FieldElement
   end
 
   def /(other)
-    operation = lambda {|other| 
+    operation = lambda {|other|
       ((self.num * inverse(other)) % self.prime)
     }
     op(other, 'division', operation)
@@ -113,19 +113,36 @@ class Point
       return self
     end
 
-    # Handle additive inverses
+    # Handle additive inverses (where the two points form a vertical line. ie, same x values)
     if self.x == other.x && self.y != other.y
       return self.infinityPoint(self.a, self.b)
     end
 
-    # Handle distinct points on the same curve
+    # Handle distinct points on the same curve (x's differ)
+    if self.x !== other.x
+      s = (other.y - self.y)/(other.x - self.x)
+      x3 = s**2 - self.x - other.x
+      y3 = (self.x - x3) * s - self.y
+      return self.class.new(x3, y3, self.a, self.b)
+    end
 
-
-    # Handle the equivalent points
-
+    # Handle the equivalent points (same x and y values)
+    # Visually, the line passing through these points runs tangent to the curve
+    # So we will have to take the derivative of the curve:
+    # y2 = x**3 +ax + b
+    # 2ydy = (3x**2 + a)dx
+    # dy/dx = (3x**2 + a)/(2y) = s
+    if self == other
+      if self.y == 0
+        return self.infinityPoint(self.a, self.b)
+      else
+        s = (3 * (self.x**2) + a)/(2 * self.y)
+        x3 = ((s**2) - (2 * self.x))
+        y3 = s(self.x - x3) - self.y
+        return self.class.new(x3, y3, self.a, self.b)
+      end
+    end
   end
-
-  private
 
   def infinityPoint(a, b)
     self.class.new(nil, nil, a, b)
