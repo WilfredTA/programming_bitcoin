@@ -1,3 +1,4 @@
+
 class FieldElement
   attr_accessor :num, :prime
   def initialize(num, prime)
@@ -88,6 +89,7 @@ class Point
     return if x == nil && y == nil
     if self.y ** 2 != self.x ** 3 + a * x + b
       raise PointError.new("#{x} and #{y} are not on the right curve")
+    end
   end
 
   def ==(other)
@@ -119,7 +121,7 @@ class Point
     end
 
     # Handle distinct points on the same curve (x's differ)
-    if self.x !== other.x
+    if self.x != other.x
       s = (other.y - self.y)/(other.x - self.x)
       x3 = s**2 - self.x - other.x
       y3 = (self.x - x3) * s - self.y
@@ -163,5 +165,4 @@ class PointError < StandardError
   def initialize(msg)
     super(msg)
   end
-
 end
