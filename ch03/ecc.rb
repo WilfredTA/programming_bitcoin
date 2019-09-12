@@ -193,6 +193,8 @@ class S256Field < FieldElement
 end
 
 
+
+
 class FieldOperationError < StandardError
   attr_accessor :fieldElements, :operation
   def initialize(fieldElements, operation)
