@@ -1,4 +1,6 @@
 
+
+
 class FieldElement
   attr_accessor :num, :prime
   def initialize(num, prime)
@@ -17,11 +19,12 @@ class FieldElement
     if !other
       return false
     end
-    return self.num == other.num && self.prime == other.prime
+    return (self.num == other.num) && (self.prime == other.prime)
   end
 
   def !=(other)
-    return !self.==(other)
+    equality = self == other
+    !equality
   end
 
   def +(other)
@@ -87,7 +90,9 @@ class Point
     self.y = y
 
 
-    return if x == nil && y == nil
+    if x == nil && y == nil
+      return self.infinityPoint(a, b)
+    end
     if self.y ** FieldElement.new(2, x.prime) != self.x ** FieldElement.new(3, x.prime) + a * x + b
       raise PointError.new("#{x} and #{y} are not on the right curve")
     end
@@ -99,7 +104,8 @@ class Point
   end
 
   def !=(other)
-    !self == other
+    equality = self == other
+    !equality
   end
 
   def +(other)
@@ -124,7 +130,7 @@ class Point
     # Handle distinct points on the same curve (x's differ)
     if self.x != other.x
       s = (other.y - self.y)/(other.x - self.x)
-      x3 = s**2 - self.x - other.x
+      x3 = s**FieldElement.new(2, self.x.prime) - self.x - other.x
       y3 = (self.x - x3) * s - self.y
       return self.class.new(x3, y3, self.a, self.b)
     end
@@ -136,12 +142,12 @@ class Point
     # 2ydy = (3x**2 + a)dx
     # dy/dx = (3x**2 + a)/(2y) = s
     if self == other
-      if self.y == 0
+      if self.y == FieldElement.new(0, self.x.prime)
         return self.infinityPoint(self.a, self.b)
       else
-        s = (3 * (self.x**2) + a)/(2 * self.y)
-        x3 = ((s**2) - (2 * self.x))
-        y3 = s(self.x - x3) - self.y
+        s = (FieldElement.new(3, self.x.prime) * (self.x ** FieldElement.new(2, self.x.prime)) + a)/(FieldElement.new(2, self.x.prime) * self.y)
+        x3 = ((s**FieldElement.new(2, self.x.prime)) - (FieldElement.new(2, self.x.prime) * self.x))
+        y3 = ((s * self.x) - (s * x3)) - self.y
         return self.class.new(x3, y3, self.a, self.b)
       end
     end
@@ -151,7 +157,8 @@ class Point
     i = 1
     sum = self
 
-    while i <= coefficient
+    (i...coefficient).each do |num|
+      i += 1
       sum = sum + self
     end
 
@@ -162,6 +169,29 @@ class Point
     self.class.new(nil, nil, a, b)
   end
 end
+
+
+class S256Field < FieldElement
+  @@prime = 2**256-2**32-977
+  def initialize(num, prime=nil)
+    super(num, @@prime)
+    p self.to_s
+  end
+
+  def to_s
+    string_num = self.num.to_s
+    zero_string = ""
+    i = 64
+    while i > 0
+      zero_string << "0"
+      i -= 1
+    end
+    zero_string << string_num
+  end
+
+
+end
+
 
 class FieldOperationError < StandardError
   attr_accessor :fieldElements, :operation

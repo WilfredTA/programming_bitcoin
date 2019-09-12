@@ -32,6 +32,7 @@ class EccTest < Minitest::Test
     x = FieldElement.new(47, prime)
     y = FieldElement.new(71, prime)
     p = Point.new(x,y,a,b)
+  #  z = S256Field.new(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798)
 
     assert_equal((p * 1), p)
     assert_equal((p * 2),
@@ -40,5 +41,6 @@ class EccTest < Minitest::Test
         FieldElement.new(111, prime),
         a, b))
   end
+
 
 end
